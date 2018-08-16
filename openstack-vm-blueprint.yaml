@@ -1,0 +1,42 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.3/types.yaml
+  - plugin:cloudify-openstack-plugin
+
+
+inputs:
+  server_name:
+    type: string
+    default: server
+
+  server_image:
+    type: string
+    default: "centos7.4-1802"
+
+  server_flavor:
+    type: string
+    default: "m1.small"
+
+
+dsl_definitions:
+
+  openstack_config: &openstack_config
+    username: { get_secret: keystone_username }
+    password: { get_secret: keystone_password }
+    project_id: { get_secret: project_id }
+    user_domain_name: { get_secret: user_domain_name }
+    auth_url: { get_secret: auth_url }
+
+node_templates:
+
+  server_host:
+    type:  cloudify.openstack.nodes.Server
+    properties:
+      resource_id:  { get_input: server_name }
+      openstack_config: *openstack_config
+      image: { get_input: server_image }
+      flavor:  { get_input: server_flavor }
+      management_network_name: "bala"
+      agent_config:
+        install_method: none
